@@ -1,7 +1,7 @@
 <?php
 
 	include 'setup/db_connection.php';
-	$mysqli = OpenConnection();
+	$mysqli = openConnection();
 
 	if(isset($_POST["username"], $_POST["password"])) {
 		$username = $_POST['username'];
