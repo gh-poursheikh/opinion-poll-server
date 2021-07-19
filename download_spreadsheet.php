@@ -1,8 +1,9 @@
 <?php
     
     include 'setup/db_connection.php';
+    include 'PhpSpreadsheet/vendor/autoload.php';
+	
 	$mysqli = openConnection();
-
     $query = "SELECT DISTINCT product_id FROM rating";
     $result = $mysqli -> query($query) or die($mysqli -> error);
 
@@ -35,7 +36,31 @@
         }
     }
 
-    echo json_encode($report);
+    use PhpOffice\PhpSpreadsheet\Spreadsheet;
+    use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+    $spreadsheet = new Spreadsheet();
+    $Excel_writer = new Xlsx($spreadsheet);
+
+    $spreadsheet->setActiveSheetIndex(0);
+    $activeSheet = $spreadsheet->getActiveSheet();
+
+    $activeSheet->setCellValue('A1', 'Product Name');
+    $activeSheet->setCellValue('B1', 'Product Average');
+
+    $i = 2;
+	foreach ($report as $record) {
+        $activeSheet->setCellValue('A'.$i , $record['product_name']);
+        $activeSheet->setCellValue('B'.$i , $record['product_average']);
+        $i++;
+    }
+
+	$filename = 'report.xlsx';
+	
+	header('Content-Type: application/vnd.ms-excel');
+	header('Content-Disposition: attachment;filename='. $filename);
+	header('Cache-Control: max-age=0');
+	$Excel_writer->save('php://output');
 
     $result -> free_result();
     $stmt -> close();
